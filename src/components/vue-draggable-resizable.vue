@@ -8,6 +8,8 @@
       [classNameDraggable]: draggable,
       [classNameResizable]: resizable
     }, className]"
+    @mouseover="toggleShowHandle(true, $event)"
+    @mouseleave="toggleShowHandle(false, $event)"
     @mousedown="elementDown"
     @touchstart="elementTouchDown"
   >
@@ -204,7 +206,11 @@ export default {
     onResizeStart: {
       type: Function,
       default: null
-    }
+    },
+    enableShowHandleMouseover: {
+      type: Boolean,
+      default: false
+    },
   },
 
   data: function () {
@@ -275,6 +281,14 @@ export default {
   },
 
   methods: {
+    toggleShowHandle(isMouseHover, event) {
+      if (!this.enableShowHandleMouseover) return
+      if (isMouseHover) {
+        this.elementDown(event)
+      } else {
+        this.enabled = false
+      }
+    },
     resetBoundsAndMouseState () {
       this.mouseClickPosition = { mouseX: 0, mouseY: 0, x: 0, y: 0, w: 0, h: 0 }
 
@@ -392,11 +406,15 @@ export default {
       this.resetBoundsAndMouseState()
     },
     handleTouchDown (handle, e) {
+      this.elementDown(handle)
+
       eventsFor = events.touch
 
       this.handleDown(handle, e)
     },
     handleDown (handle, e) {
+      this.elementDown(handle)
+
       if (this.onResizeStart && this.onResizeStart(handle, e) === false) {
         return
       }
